@@ -1,5 +1,19 @@
 # Changelog
 
+## [beta](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/tree/beta) (2026/07/10)
+
+[Full Changelog](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/compare/v0.22.0...beta)
+
+
+## What's Changed
+### Fixed Calculations
+- Fix Conductive Runes scaling with weapon damage [\#2341](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/pull/2341) ([moxaj](https://github.com/moxaj))
+- Fix Crit Chance and base damage for some skills [\#2340](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/pull/2340) ([LocalIdentity](https://github.com/LocalIdentity))
+### Accuracy Improvements
+- Fix parsing Vaal Unique modifiers on items [\#2357](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/pull/2357) ([vaisest](https://github.com/vaisest))
+
+
+
 ## [v0.22.0](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/tree/v0.22.0) (2026/07/01)
 
 [Full Changelog](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/compare/v0.21.1...v0.22.0)

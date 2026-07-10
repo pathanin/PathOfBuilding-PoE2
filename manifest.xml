@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <PoBVersion>
-	<Version number="0.22.0" />
+	<Version number="0.22.0-e5a509123" />
 	<Source part="default" url="https://raw.githubusercontent.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/{branch}/" />
 	<Source part="runtime" platform="win32" url="https://raw.githubusercontent.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/{branch}/runtime/" />
 	<Source part="program" url="https://raw.githubusercontent.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/{branch}/src/" />
 	<Source part="tree" url="https://raw.githubusercontent.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/{branch}/src/" />
-	<File name="changelog.txt" part="default" sha1="d5d2c86d15e89b1ead8f4616ce2f58d12f62555e" />
+	<File name="changelog.txt" part="default" sha1="287ced71f1fff854176110d84849efbfcaafe39f" />
 	<File name="help.txt" part="default" sha1="eb788d20352333fad99bcf6092306f0c3bca3122" />
 	<File name="LICENSE.md" part="default" sha1="e81bd01e60cdf8646f3308ec71fa0e8e638d544e" />
 	<File name="Assets/ascendancypassiveheaderleft.png" part="program" sha1="c1c73a71cc742de4f2964da78e9ed8841ab7039d" />
@@ -132,7 +132,7 @@
 	<File name="Classes/GemSelectControl.lua" part="program" sha1="7f8192e5f047d83a0adf8fbab50192b5d3b6fffd" />
 	<File name="Classes/GemTooltip.lua" part="program" sha1="c1f483b86c0810db761d50da0429a453ff82d477" />
 	<File name="Classes/ImportTab.lua" part="program" sha1="5ffe2f84c809fdb7dc19364559183a0c491c81c8" />
-	<File name="Classes/Item.lua" part="program" sha1="1df0d1fcffc91d10d2f6b8fa5c6900abdc3cd18a" />
+	<File name="Classes/Item.lua" part="program" sha1="44c844481106d3ac6e99c5eb0cc52a61a0d418af" />
 	<File name="Classes/ItemDBControl.lua" part="program" sha1="696baeaf56bf7f4c8df948c69e1e6e82eec46b22" />
 	<File name="Classes/ItemListControl.lua" part="program" sha1="a1703a75de1235b4947dea6d7454211ba1498e99" />
 	<File name="Classes/ItemSetListControl.lua" part="program" sha1="092b115a57dcd809e693dea760bc645ffdd59182" />
@@ -239,16 +239,16 @@
 	<File name="Data/QueryMods.lua" part="program" sha1="a73ee90fc4fc3c0f2c2306b45192cd3ec8156dba" />
 	<File name="Data/QuestRewards.lua" part="program" sha1="cbf17400da177d6a7d2c0cc63a796a256b4e0308" />
 	<File name="Data/Rares.lua" part="program" sha1="0828ab87b6eb19b9a3375818b84fe06927dff27b" />
-	<File name="Data/Skills/act_dex.lua" part="program" sha1="71823d139539e8ee37fced9efc6cf42d6bbeebfc" />
-	<File name="Data/Skills/act_int.lua" part="program" sha1="97ca57a92dc7a39fc55b560092e44ff92dc4277b" />
-	<File name="Data/Skills/act_str.lua" part="program" sha1="d658eda8dbda43768af99b1bf64146a1dcd97157" />
+	<File name="Data/Skills/act_dex.lua" part="program" sha1="3fe00dc6c4e433de65247617e241988ae9b166db" />
+	<File name="Data/Skills/act_int.lua" part="program" sha1="0b4b359a4322ab9ccdd9b71f6732a2b5c2edb59e" />
+	<File name="Data/Skills/act_str.lua" part="program" sha1="882dcf69cc7ec934ead48464654b62aa760c8557" />
 	<File name="Data/Skills/gem-backgrounds_700_372_BC7.dds.zst" part="program" sha1="7704035b8465aa0d02ee696dc3a8f3eac3af3690" />
 	<File name="Data/Skills/gem-icons_64_64_BC1.dds.zst" part="program" sha1="b8abe1d716ca4df19d4a0bf77fa664142cb31805" />
 	<File name="Data/Skills/gem-icons_108_108_RGBA.dds.zst" part="program" sha1="76805944f1267ea9e7549443dd115e2ea959f673" />
 	<File name="Data/Skills/gem-icons_200_200_BC1.dds.zst" part="program" sha1="c31458f42d1aefff51fd1f7f0f852f2a034d0d27" />
 	<File name="Data/Skills/gem-icons_332_332_BC1.dds.zst" part="program" sha1="d39e3b25fd74b0f23c9cdd2e777c7f79f7de134f" />
 	<File name="Data/Skills/minion.lua" part="program" sha1="a681113eaa02e468b595958216d34a5521c17aff" />
-	<File name="Data/Skills/other.lua" part="program" sha1="759c86edb5debe61ce91d4892cbda0a3b25e06d1" />
+	<File name="Data/Skills/other.lua" part="program" sha1="4a7128ccb8bbe26614585c601ae59f57194058b3" />
 	<File name="Data/Skills/SkillAssets.lua" part="program" sha1="4c1201f4a387d4dadec2ed53d2f092871cf8d486" />
 	<File name="Data/Skills/spectre.lua" part="program" sha1="539145927835e4aa229878252a6195aeea5bb51c" />
 	<File name="Data/Skills/sup_dex.lua" part="program" sha1="24eb183dd0435c785d1682dd5de2fa1e6d157441" />

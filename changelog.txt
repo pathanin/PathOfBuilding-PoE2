@@ -1,3 +1,13 @@
+VERSION[beta][2026/07/10]
+
+--- Fixed Calculations ---
+* Fix Conductive Runes scaling with weapon damage (moxaj)
+* Fix Crit Chance and base damage for some skills (LocalIdentity)
+
+--- Accuracy Improvements ---
+* Fix parsing Vaal Unique modifiers on items (vaisest)
+
+
 VERSION[0.22.0][2026/07/01]
 
 --- 0.5 Return of the Ancients ---
