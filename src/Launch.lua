@@ -15,6 +15,13 @@ ConExecute("set vid_resizable 3")
 launch = { }
 SetMainObject(launch)
 jit.opt.start('maxtrace=4000','maxmcode=8192')
+if jit.os == "OSX" then
+	-- Upstream LuaJIT forces external (system) unwinding on Darwin, so every JIT trace
+	-- abort - a routine, frequent event, not an error - pays the cost of a full libunwind/
+	-- dyld stack walk instead of LuaJIT's cheap internal unwinder. That makes normal UI
+	-- interaction stall for seconds at a time. Running in interpreter-only mode avoids it.
+	jit.off()
+end
 collectgarbage("setpause", 400)
 
 function launch:OnInit()
