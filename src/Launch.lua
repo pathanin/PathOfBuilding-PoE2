@@ -15,7 +15,7 @@ ConExecute("set vid_resizable 3")
 launch = { }
 SetMainObject(launch)
 jit.opt.start('maxtrace=4000','maxmcode=8192')
-if require("ffi").os == "OSX" then
+if jit.os == "OSX" then
 	-- Upstream LuaJIT forces external (system) unwinding on Darwin, so every JIT trace
 	-- abort - a routine, frequent event, not an error - pays the cost of a full libunwind/
 	-- dyld stack walk instead of LuaJIT's cheap internal unwinder. That makes normal UI
