@@ -398,23 +398,23 @@ function TradeQueryRequestsClass:FetchResultBlock(url, callback)
 				item.explicitMods = item.explicitMods or { }
 
 				t_insert(rawLines, "Implicits: " .. (#item.enchantMods + #item.runeMods + #item.implicitMods))
-				for _, modLine in ipairs(item.enchantMods) do
-					t_insert(rawLines, "{enchant}" .. escapeGGGString(modLine))
+				for _, itemMod in ipairs(item.enchantMods) do
+					t_insert(rawLines, "{enchant}" .. escapeGGGString(itemMod.description or itemMod))
 				end
-				for _, modLine in ipairs(item.runeMods) do
-					t_insert(rawLines, "{enchant}{rune}" .. escapeGGGString(modLine))
+				for _, itemMod in ipairs(item.runeMods) do
+					t_insert(rawLines, "{enchant}{rune}" .. escapeGGGString(itemMod.description or itemMod))
 				end
-				for _, modLine in ipairs(item.implicitMods) do
-					t_insert(rawLines, escapeGGGString(modLine))
+				for _, itemMod in ipairs(item.implicitMods) do
+					t_insert(rawLines, escapeGGGString(itemMod.description or itemMod))
 				end
-				for _, modLine in ipairs(item.explicitMods) do
+				for _, itemMod in ipairs(item.explicitMods) do
 					local s = ""
-					for flagName, flag in pairs(modLine.flags or {}) do
+					for flagName, flag in pairs(itemMod.flags or {}) do
 						if flag then
 							s = s .. string.format("{%s}", flagName)
 						end
 					end
-					t_insert(rawLines, s .. escapeGGGString(modLine.description))
+					t_insert(rawLines, s .. escapeGGGString(itemMod.description or itemMod))
 				end
 				if item.mirrored then
 					t_insert(rawLines, "Mirrored")
@@ -428,6 +428,9 @@ function TradeQueryRequestsClass:FetchResultBlock(url, callback)
 					t_insert(rawLines, "Sanctified")
 				end
 
+				local pseudoMod = item.pseudoMods and item.pseudoMods[1]
+				pseudoMod = pseudoMod and (pseudoMod.description or pseudoMod)
+
 				table.insert(items, {
 					amount = trade_entry.listing.price.amount,
 					currency = trade_entry.listing.price.currency,
@@ -435,7 +438,7 @@ function TradeQueryRequestsClass:FetchResultBlock(url, callback)
 					item_string = table.concat(rawLines, "\n"),
 					whisper = trade_entry.listing.whisper,
 					trader = trade_entry.listing.account.name,
-					weight = trade_entry.item.pseudoMods and trade_entry.item.pseudoMods[1]:match("Sum: (.+)") or "0",
+					weight = pseudoMod and pseudoMod:match("Sum: (.+)") or "0",
 					id = trade_entry.id
 				})
 			end
