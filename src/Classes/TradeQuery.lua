@@ -1022,70 +1022,28 @@ function TradeQueryClass:PriceItemRowDisplay(row_idx, top_pane_alignment_ref, ro
 				controls["uri"..context.row_idx]:SetText(url, true)
 				return
 			end
+			-- Register the search so we get a short shareable link, but stop there: the item
+			-- listings are never fetched. Press "Price Item" on the resulting URL to pull them.
 			context.controls["priceButton"..context.row_idx].label = "Searching..."
 			self.lastQueries[row_idx] = query
-			self.tradeQueryRequests:SearchWithQueryWeightAdjusted(self.pbRealm, self.pbLeague, query,
-				function(items, errMsg)
-					if errMsg then
-						self:SetNotice(context.controls.pbNotice, colorCodes.NEGATIVE .. errMsg)
-						context.controls["priceButton"..context.row_idx].label =  "Price Item"
-						return
-					else
-						self:SetNotice(context.controls.pbNotice, "")
-					end
-
-					local selectedSlot = getSelectedSlot()
-					local itemsSafe = self:FilterToSafeItems(items, selectedSlot and selectedSlot.slotName)
-
-					if self.tradeQueryGenerator.lastAugmentBehaviour == "Copy Current" or self.tradeQueryGenerator.lastAnointBehaviour == "Copy Current" then
-						for i, _ in ipairs(itemsSafe) do
-							local item = new("Item", itemsSafe[i].item_string)
-							-- avoid interacting with badly parsed stuff
-							if item.base and item.type then
-								self.itemsTab:CopyAnointsAndAugments(item, true, true, context.slotTbl.slotName)
-								itemsSafe[i].item_string = item:BuildRaw()
-							end
-						end
-					elseif self.tradeQueryGenerator.lastAugmentBehaviour == "Remove" then
-						for item_idx, _ in ipairs(itemsSafe) do
-							local item = new("Item", itemsSafe[item_idx].item_string)
-							-- sockets are kept as-is so the user can see e.g. exceptional or corrupted sockets
-							local validRunes = self.itemsTab:GetValidRunesForItem(item)
-							for rune_idx, _ in ipairs(item.runes or {}) do
-								if not self.itemsTab:IsSocketBoundRune(item, item.runes[rune_idx], validRunes) then
-									item.runes[rune_idx] = "None"
-								end
-							end
-							item:UpdateRunes()
-							itemsSafe[item_idx].item_string = item:BuildRaw()
-						end
-					elseif self.tradeQueryGenerator.lastAnointBehaviour == "Remove" then
-						for i, _ in ipairs(itemsSafe) do
-							local item = new("Item", itemsSafe[i].item_string)
-							item.enchantModLines = {}
-							itemsSafe[i].item_string = item:BuildRaw()
-						end
-					end
-
-					self.resultTbl[context.row_idx] = itemsSafe
-					self:UpdateControlsWithItems(context.row_idx)
-					context.controls["priceButton"..context.row_idx].label =  "Price Item"
-				end,
-				{
-					callbackQueryId = function(queryId)
-						local url = self.tradeQueryRequests:buildUrl(self.hostName .. "trade2/search", self.pbRealm, self.pbLeague, queryId)
-						controls["uri"..context.row_idx]:SetText(url, true)
-					end
-				}
-			)
+			self.tradeQueryRequests:PerformSearch(self.pbRealm, self.pbLeague, query, function(response, errMsg)
+				context.controls["priceButton"..context.row_idx].label = "Price Item"
+				-- Set the URL even on error, so an empty search still gives a link to loosen in the browser
+				if response and response.id then
+					local url = self.tradeQueryRequests:buildUrl(self.hostName .. "trade2/search", self.pbRealm, self.pbLeague, response.id)
+					controls["uri"..context.row_idx]:SetText(url, true)
+				end
+				self:SetNotice(context.controls.pbNotice, errMsg and (colorCodes.NEGATIVE .. errMsg) or "")
+			end)
 		end)
 	end)
 	controls["bestButton"..row_idx].shown = function() return not self.resultTbl[row_idx] end
 	controls["bestButton"..row_idx].enabled = function() return self.pbLeague end
 	controls["bestButton"..row_idx].tooltipText = [[Creates a weighted search to find the highest Stat Value items for this slot.
-Note that even if you are authenticated, you can click this button again to show the search link.
+The trade link is put in the box to the right; the items themselves are not fetched.
+Control + click the link to open the search in your web-browser.
 If you have additional requirements that the trade tool doesn't cover (e.g. Adorned Magic jewels),
-you can add them, copy the link here, and press "Price Item" to evaluate the items.]]
+you can add them, then press "Price Item" to evaluate the items inside Path of Building.]]
 	controls["bestButton" .. row_idx].onHover = function()
 		local button = controls["bestButton" .. row_idx]
 
