@@ -404,6 +404,8 @@ function TradeQueryRequestsClass:FetchResultBlock(url, callback)
 							s = s .. string.format("{%s}", flagName)
 						end
 					end
+					-- fork delta vs upstream: upstream builds s and then returns without it,
+					-- dropping the {fractured}/{crafted} prefixes. Keep the concatenation.
 					return s .. escapeGGGString(modLine.description)
 				end
 				t_insert(rawLines, "Implicits: " .. (#item.enchantMods + #item.runeMods + #item.implicitMods))
@@ -440,6 +442,8 @@ function TradeQueryRequestsClass:FetchResultBlock(url, callback)
 					item_string = table.concat(rawLines, "\n"),
 					whisper = trade_entry.listing.whisper,
 					trader = trade_entry.listing.account.name,
+					-- fork delta vs upstream: guard on pseudoModLine, not on pseudoMods. An empty
+					-- pseudoMods table passes upstream's check and then nil-crashes on :match.
 					weight = pseudoModLine and pseudoModLine:match("Sum: (.+)") or "0",
 					id = trade_entry.id
 				})
