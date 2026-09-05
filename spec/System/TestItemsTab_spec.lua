@@ -16,6 +16,49 @@ describe("TestItemsTab", function()
 		runCallback("OnFrame")
 	end)
 
+	it("keeps item tooltips for socket slots without note buttons", function()
+		local item = new("Item"):Item([[Rarity: RARE
+Test Jewel
+Ruby]])
+		build.itemsTab:AddItem(item, true)
+		build.itemsTab:PopulateSlots()
+
+		local socket, itemIndex
+		for _, candidate in pairs(build.itemsTab.sockets) do
+			for index, itemId in ipairs(candidate.items) do
+				if itemId == item.id then
+					socket, itemIndex = candidate, index
+					break
+				end
+			end
+			if socket then break end
+		end
+		assert.is_not_nil(socket)
+		assert.is_nil(socket.controls.noteButton)
+
+		local checkCalled = false
+		local clearCalled = false
+		local tooltip = {
+			Clear = function()
+				clearCalled = true
+			end,
+			CheckForUpdate = function()
+				checkCalled = true
+				return false
+			end,
+		}
+		local popup = main.popups[1]
+		local selControl = build.itemsTab.selControl
+		main.popups[1] = nil
+		build.itemsTab.selControl = nil
+		socket.tooltipFunc(tooltip, "IN", itemIndex, item.id)
+		main.popups[1] = popup
+		build.itemsTab.selControl = selControl
+
+		assert.is_true(checkCalled)
+		assert.is_false(clearCalled)
+	end)
+
 	describe("ItemsTab", function()
 		describe("NewItemSet", function()
 			it("Creates a new item set with specified ID", function()
@@ -55,6 +98,14 @@ describe("TestItemsTab", function()
 				build.itemsTab:NewItemSet(nil, newTitle)
 
 				assert.is_true(build.itemsTab.modFlag)
+			end)
+
+			it("does not copy equipment notes into a new item set", function()
+				build.itemsTab.slots.Belt.note = "Active set note"
+
+				local newItemSet = build.itemsTab:NewItemSet(nil, "New Item Set")
+
+				assert.is_nil(newItemSet.Belt.note)
 			end)
 		end)
 
@@ -184,7 +235,7 @@ describe("TestItemsTab", function()
 
 	describe("ItemSetListControl", function()
 		it("adds an imported shared item set to the build once", function()
-			local itemSetList = new("ItemSetListControl", nil, { 0, 0, 300, 200 }, build.itemsTab)
+			local itemSetList = new("ItemSetListControl"):ItemSetListControl(nil, { 0, 0, 300, 200 }, build.itemsTab)
 
 			itemSetList:ReceiveDrag("SharedItemList", { title = "Shared Set", slots = {} })
 
@@ -196,7 +247,7 @@ describe("TestItemsTab", function()
 	describe("ItemSetService", function()
 		local itemSetService
 		before_each(function()
-			itemSetService = new("ItemSetService", build.itemsTab)
+			itemSetService = new("ItemSetService"):ItemSetService(build.itemsTab)
 		end)
 
 		describe("NewItemSet", function()
@@ -338,7 +389,7 @@ describe("TestItemsTab", function()
 		local itemSetService
 
 		before_each(function()
-			itemSetService = new("ItemSetService", build.itemsTab)
+			itemSetService = new("ItemSetService"):ItemSetService(build.itemsTab)
 		end)
 
 		describe("Item set persistence across switches", function()
@@ -416,7 +467,7 @@ describe("TestItemsTab", function()
 
 		-- Equips an item into the active item set's appropriate slot
 		local function equip(raw)
-			local item = new("Item", raw)
+			local item = new("Item"):Item(raw)
 			build.itemsTab:AddItem(item)
 			build.itemsTab:EquipItemInSet(item, build.itemsTab.activeItemSetId)
 			return item
@@ -431,7 +482,7 @@ describe("TestItemsTab", function()
 					Allocates Serrated Edges (enchant)
 				]])
 
-				local newItem = new("Item", [[
+				local newItem = new("Item"):Item([[
 					Rarity: RARE
 					New
 					Azure Amulet
@@ -449,7 +500,7 @@ describe("TestItemsTab", function()
 					Allocates Serrated Edges (enchant)
 				]])
 
-				local newItem = new("Item", [[
+				local newItem = new("Item"):Item([[
 					Rarity: RARE
 					New
 					Azure Amulet
@@ -469,7 +520,7 @@ describe("TestItemsTab", function()
 					Allocates Serrated Edges (enchant)
 				]])
 
-				local newItem = new("Item", [[
+				local newItem = new("Item"):Item([[
 					Rarity: RARE
 					New
 					Azure Amulet
@@ -490,7 +541,7 @@ describe("TestItemsTab", function()
 				]])
 
 				for _, status in ipairs({ "Corrupted", "Mirrored", "Sanctified" }) do
-					local newItem = new("Item", string.format([[
+					local newItem = new("Item"):Item(string.format([[
 						Rarity: RARE
 						New
 						Azure Amulet
@@ -523,7 +574,7 @@ describe("TestItemsTab", function()
 			it("copies runes from the equipped item when copyAugments is true", function ()
 				equip(existingItemText)
 
-				local newItem = new("Item", [[
+				local newItem = new("Item"):Item([[
 					Rarity: RARE
 					New
 					Stocky Mitts
@@ -536,7 +587,7 @@ describe("TestItemsTab", function()
 			it("adds sockets to the new item to fit the copied runes", function ()
 				equip(existingItemText)
 
-				local newItem = new("Item", newItemText)
+				local newItem = new("Item"):Item(newItemText)
 				assert.are.equals(0, #newItem.sockets)
 
 				build.itemsTab:CopyAnointsAndAugments(newItem, true, false)
@@ -547,7 +598,7 @@ describe("TestItemsTab", function()
 			it("does not copy runes when copyAugments is false", function ()
 				equip(existingItemText)
 
-				local newItem = new("Item", newItemText)
+				local newItem = new("Item"):Item(newItemText)
 				build.itemsTab:CopyAnointsAndAugments(newItem, false, false)
 
 				assert.are.equals(0, #newItem.sockets)
@@ -556,7 +607,7 @@ describe("TestItemsTab", function()
 			it("does not replace socket bound runes", function ()
 				equip(existingItemText)
 
-				local newItem = new("Item", [[
+				local newItem = new("Item"):Item([[
 					Rarity: RARE
 					Equipped
 					Stocky Mitts
@@ -566,7 +617,7 @@ describe("TestItemsTab", function()
 				build.itemsTab:CopyAnointsAndAugments(newItem, true, true)
 				assert.are.equals(newItem.runes[1], "Kolr's Hunt")
 
-				local newItem = new("Item", [[
+				local newItem = new("Item"):Item([[
 					Rarity: RARE
 					Equipped
 					Stocky Mitts
@@ -581,7 +632,7 @@ describe("TestItemsTab", function()
 			it("replaces runes when overwrite is true", function ()
 				equip(existingItemText)
 
-				local newItem = new("Item", [[
+				local newItem = new("Item"):Item([[
 					Rarity: RARE
 					Equipped
 					Stocky Mitts
@@ -594,7 +645,7 @@ describe("TestItemsTab", function()
 			end)
 
 			it("identifies socket bound runes", function ()
-				local item = new("Item", [[
+				local item = new("Item"):Item([[
 					Rarity: RARE
 					Equipped
 					Stocky Mitts
@@ -610,7 +661,7 @@ describe("TestItemsTab", function()
 
 			it("uses variant socket types for valid augments", function ()
 				for _, itemRaw in ipairs({ data.uniques.belt[6], data.uniques.body[1] }) do
-					local item = new("Item", itemRaw)
+					local item = new("Item"):Item(itemRaw)
 					item.variant = 1 -- Helmet
 					item:BuildModList()
 
@@ -632,8 +683,33 @@ describe("TestItemsTab", function()
 				end
 			end)
 
+			it("restricts augments that cannot be socketed in unique items", function()
+				local item = new("Item"):Item("Rarity: UNIQUE\nTest Unique\nSlayer Armour\nSockets: S")
+				local validRunes = { }
+				for _, rune in ipairs(build.itemsTab:GetValidRunesForItem(item)) do
+					validRunes[rune.name] = true
+				end
+
+				assert.is_nil(validRunes["Serle's Triumph"])
+				assert.is_true(validRunes["Aldur's Legacy"])
+			end)
+
+			it("restricts augments that cannot be socketed in jewellery", function()
+				local item = new("Item"):Item(data.uniques.belt[6])
+				assert.matches("Darkness Enthroned", item.name, nil, true)
+				item.variant = 2 -- Body Armour
+				item:BuildModList()
+				local validRunes = { }
+				for _, rune in ipairs(build.itemsTab:GetValidRunesForItem(item)) do
+					validRunes[rune.name] = true
+				end
+
+				assert.is_nil(validRunes["Aldur's Legacy"])
+				assert.is_true(validRunes["Desert Rune"])
+			end)
+
 			it("refreshes valid augments when the item variant changes", function ()
-				local item = new("Item", data.uniques.body[1])
+				local item = new("Item"):Item(data.uniques.body[1])
 				item.variant = 3 -- Boots
 				item:BuildModList()
 				build.itemsTab:SetDisplayItem(item)
@@ -648,6 +724,33 @@ describe("TestItemsTab", function()
 					end
 				end
 				assert.is_true(foundMaximumRage)
+			end)
+
+			it("refreshes affix controls when an augment changes affix limits", function ()
+				build.itemsTab:CreateDisplayItemFromRaw([[
+					Rarity: RARE
+					New
+					Stocky Mitts
+					Crafted: true
+					Sockets: S
+				]], true)
+
+				local runeControl = build.itemsTab.controls.displayItemRune1
+				local serlesIndex
+				for index, rune in ipairs(runeControl.list) do
+					if rune.name == "Serle's Triumph" then
+						serlesIndex = index
+						break
+					end
+				end
+				assert.is_not_nil(serlesIndex)
+				runeControl:SetSel(serlesIndex)
+
+				local affixControl = build.itemsTab.controls.displayItemAffix7
+				assert.are.equals(7, build.itemsTab.displayItem.affixLimit)
+				assert.are.equals("suffixes", affixControl.outputTable)
+				assert.are.equals("None", affixControl.list[1])
+				affixControl.tooltipFunc({ Clear = function() end }, "BODY", affixControl.selIndex, affixControl.list[affixControl.selIndex])
 			end)
 
 			it("keeps Darkness Enthroned's socket editor available at zero sockets", function ()
@@ -705,7 +808,7 @@ describe("TestItemsTab", function()
 			end)
 
 			it("deduplicates valid augments by socketed item name", function ()
-				local item = new("Item", data.uniques.body[1])
+				local item = new("Item"):Item(data.uniques.body[1])
 				item.variant = 4 -- Shield
 				item:BuildModList()
 
@@ -722,10 +825,29 @@ describe("TestItemsTab", function()
 				assert.are.equals("Hits against you have 20% reduced Critical Damage Bonus", ticabaRune.lines[1])
 				assert.are.equals("Hits against you have 20% reduced Critical Damage Bonus", ticabaRune.lines[2])
 			end)
+
+			it("keeps pure Bonded slot entries and uses the regular rune mod as the dropdown label", function ()
+				local runeMods = data.itemMods.Runes["Perfect Resolve Rune"]
+				assert.are.same({ "Adds 6 to 10 Physical Damage to Attacks", "Adds 5 to 8 Cold damage to Attacks" }, { unpack(runeMods.weapon.bonded) })
+				assert.are.same({ "+50 to maximum Energy Shield" }, { unpack(runeMods.wand.bonded) })
+
+				local item = new("Item"):Item([[
+					Test Wand
+					Runic Fork
+				]])
+
+				for _, rune in ipairs(build.itemsTab:GetValidRunesForItem(item)) do
+					if rune.name == "Perfect Resolve Rune" then
+						assert.are.equals("+15 to Intelligence", rune.label)
+						return
+					end
+				end
+				assert.fail("Perfect Resolve Rune was not valid for a wand")
+			end)
 		end)
 
 		it("does nothing when no matching item is equipped", function ()
-			local newItem = new("Item", [[
+			local newItem = new("Item"):Item([[
 				Rarity: RARE
 				New
 				Azure Amulet
@@ -734,6 +856,204 @@ describe("TestItemsTab", function()
 			build.itemsTab:CopyAnointsAndAugments(newItem, true, false)
 
 			assert.are.equals(1, #newItem.enchantModLines)
+		end)
+	end)
+	describe("TestMartialArtistRunes", function()
+		before_each(function()
+			newBuild()
+		end)
+
+		local function enableSlots()
+			build.configTab.input.customMods = "Can tattoo runes onto your body, gaining"
+			build.configTab:BuildModList()
+			build.buildFlag = true
+			runCallback("OnFrame")
+		end
+
+		local function selectRune(slotName, runeName)
+			enableSlots()
+			local slot = build.itemsTab.runeSlots[slotName]
+			slot:SelByValue(runeName, "name")
+			slot.selFunc(slot.selIndex, slot:GetSelValue())
+			build.buildFlag = true
+			runCallback("OnFrame")
+		end
+
+
+		it("creates the expected character rune slots", function()
+			local expected = {
+				"Helmet Rune #1",
+				"Body Armour Rune #1",
+				"Body Armour Rune #2",
+				"Gloves Rune #1",
+				"Boots Rune #1",
+			}
+			for _, slotName in ipairs(expected) do
+				assert.is_not_nil(build.itemsTab.runeSlots[slotName])
+			end
+		end)
+
+		it("only lists global runes that can be socketed in Chakra slots", function()
+			local slot = build.itemsTab.runeSlots["Helmet Rune #1"]
+			assert.are.equals("None", slot.list[1].label)
+			for _, rune in ipairs(slot.list) do
+				assert.is_not_nil(rune.mods)
+				if rune.name ~= "None" then
+					assert.is_true(rune.canSocketInChakraSlots)
+				end
+			end
+		end)
+
+		it("applies a global armour rune's mods to the character", function()
+			local baseFireRes = build.calcsTab.mainOutput.FireResistTotal
+			selectRune("Helmet Rune #1", "Desert Rune")
+			assert.are.equals(baseFireRes + 14, build.calcsTab.mainOutput.FireResistTotal)
+		end)
+
+		it("shows character rune attributes in the sidebar breakdown", function()
+			selectRune("Boots Rune #1", "Lesser Resolve Rune")
+			local intelligenceLine
+			for _, line in ipairs(build.controls.statBox.list) do
+				if line.breakdown == "Int" then
+					intelligenceLine = line
+					break
+				end
+			end
+
+			assert.has_no.errors(function()
+				build:SetDisplayStat({ line = intelligenceLine, x = 0, y = 0, width = 300 }, false)
+			end)
+		end)
+
+		it("calculates a hovered character rune without treating it as an item", function()
+			enableSlots()
+			local slot = build.itemsTab.runeSlots["Helmet Rune #1"]
+			slot:SelByValue("Desert Rune", "name")
+			local rune = slot:GetSelValue()
+			local calcFunc = build.calcsTab:GetMiscCalculator()
+
+			assert.has_no.errors(function()
+				calcFunc({ repSlotName = "Helmet Rune #1", repRune = rune })
+			end)
+		end)
+
+		it("caches hovered rune calculations until the build changes", function()
+			local slot = build.itemsTab.runeSlots["Helmet Rune #1"]
+			slot:SelByValue("Desert Rune", "name")
+			local rune = slot:GetSelValue()
+			slot:SelByValue("None", "name")
+			local calcCount = 0
+			build.calcsTab.GetMiscCalculator = function()
+				return function()
+					calcCount = calcCount + 1
+					return { }
+				end, { }
+			end
+			build.AddStatComparesToTooltip = function() end
+
+			slot.tooltipFunc(slot.tooltip, "HOVER", 1, rune)
+			slot.tooltipFunc(slot.tooltip, "HOVER", 1, rune)
+			assert.are.equals(1, calcCount)
+			build.outputRevision = build.outputRevision + 1
+			slot.tooltipFunc(slot.tooltip, "HOVER", 1, rune)
+			assert.are.equals(2, calcCount)
+		end)
+
+		it("selecting None applies no rune mods", function()
+			local baseFireRes = build.calcsTab.mainOutput.FireResistTotal
+			selectRune("Helmet Rune #1", "Desert Rune")
+			assert.are.equals(baseFireRes + 14, build.calcsTab.mainOutput.FireResistTotal)
+			selectRune("Helmet Rune #1", "None")
+			assert.are.equals(baseFireRes, build.calcsTab.mainOutput.FireResistTotal)
+		end)
+
+		it("stacks runes from independent character slots", function()
+			local baseFireRes = build.calcsTab.mainOutput.FireResistTotal
+			selectRune("Helmet Rune #1", "Desert Rune")
+			selectRune("Boots Rune #1", "Desert Rune")
+			assert.are.equals(baseFireRes + 28, build.calcsTab.mainOutput.FireResistTotal)
+		end)
+
+		it("restores rune selections with undo and redo", function()
+			build.itemsTab:ResetUndo()
+			selectRune("Helmet Rune #1", "Desert Rune")
+			assert.are.equals("Desert Rune", build.itemsTab.activeItemSet["Helmet Rune #1"].runeName)
+
+			build.itemsTab:Undo()
+			assert.are.equals("None", build.itemsTab.runeSlots["Helmet Rune #1"]:GetSelValue().name)
+			assert.are.equals("None", build.itemsTab.activeItemSet["Helmet Rune #1"].runeName)
+
+			build.itemsTab:Redo()
+			assert.are.equals("Desert Rune", build.itemsTab.runeSlots["Helmet Rune #1"]:GetSelValue().name)
+			assert.are.equals("Desert Rune", build.itemsTab.activeItemSet["Helmet Rune #1"].runeName)
+		end)
+
+		it("keeps rune selections with their item set", function()
+			selectRune("Helmet Rune #1", "Desert Rune")
+			local secondSet = build.itemsTab:NewItemSet(nil, "Second")
+
+			build.itemsTab:SetActiveItemSet(secondSet.id)
+			assert.are.equals("None", build.itemsTab.runeSlots["Helmet Rune #1"]:GetSelValue().name)
+			selectRune("Helmet Rune #1", "Glacial Rune")
+
+			build.itemsTab:SetActiveItemSet(1)
+			assert.are.equals("Desert Rune", build.itemsTab.runeSlots["Helmet Rune #1"]:GetSelValue().name)
+			build.itemsTab:SetActiveItemSet(secondSet.id)
+			assert.are.equals("Glacial Rune", build.itemsTab.runeSlots["Helmet Rune #1"]:GetSelValue().name)
+		end)
+
+		it("saves and loads character rune selections", function()
+			selectRune("Helmet Rune #1", "Desert Rune")
+			local xml = { }
+			build.itemsTab:Save(xml)
+
+			newBuild()
+			build.itemsTab:Load(xml)
+
+			assert.are.equals("Desert Rune", build.itemsTab.runeSlots["Helmet Rune #1"]:GetSelValue().name)
+			assert.are.equals("Desert Rune", build.itemsTab.activeItemSet["Helmet Rune #1"].runeName)
+		end)
+
+		it("ignores plural character socket descriptions", function()
+			local mods, extra = modLib.parseMod("2 Body Armour sockets")
+			assert.are.same({}, mods)
+			assert.is_nil(extra)
+		end)
+
+		it("sets the SocketRunesOnCharacter flag when granted by a mod", function()
+			assert.is_nil(build.calcsTab.mainEnv.modDB:Flag(nil, "SocketRunesOnCharacter"))
+
+			build.configTab.input.customMods = "Can tattoo runes onto your body, gaining"
+			build.configTab:BuildModList()
+			build.buildFlag = true
+			runCallback("OnFrame")
+
+			assert.truthy(build.calcsTab.mainEnv.modDB:Flag(nil, "SocketRunesOnCharacter"))
+		end)
+
+		it("warns when a limited rune exceeds its augment limit", function()
+			selectRune("Body Armour Rune #1", "Craiceann's Rune of Warding")
+			selectRune("Body Armour Rune #2", "Craiceann's Rune of Warding")
+
+			local warnings = build.controls.warnings.lines
+			assert.is_not_nil(warnings)
+			assert.equal("You are exceeding augment limit with: Craiceann's Rune of Warding", warnings[1])
+		end)
+
+		it("groups runes that share a named augment limit", function()
+			selectRune("Helmet Rune #1", "Legacy of Elevore")
+			selectRune("Body Armour Rune #1", "Legacy of Bramblejack")
+
+			local warnings = build.controls.warnings.lines
+			assert.is_not_nil(warnings)
+			assert.equal("You are exceeding augment limit with: Legacy of Bramblejack, Legacy of Elevore", warnings[1])
+		end)
+
+		it("does not group unrelated individually limited runes", function()
+			selectRune("Boots Rune #1", "Farrul's Rune of Grace")
+			selectRune("Body Armour Rune #1", "Craiceann's Rune of Warding")
+
+			assert.are.equals(0, #build.controls.warnings.lines)
 		end)
 	end)
 end)
