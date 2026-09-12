@@ -1,3 +1,4 @@
+<!-- cspell:ignore DCMAKE DVCPKG GLFW buildsystems dlopens liblcurl liblib liblua liblzip pathofbuilding pathofbuildingcommunity upstreamed -->
 # CLAUDE.md
 
 Path of Building for Path of Exile 2 — an offline build planner written in Lua (LuaJIT 2.1 / Lua 5.1 semantics) on top of **SimpleGraphic**, a native C++ host library that supplies the window, an ANGLE-backed OpenGL ES renderer, input, and the Lua API (plus native modules `lcurl`, `lzip`, `lua-utf8`, `socket`). All application logic lives in `src/`; `runtime/` holds the shipped binaries and pure-Lua libraries. PRs target the `dev` branch.
