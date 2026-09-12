@@ -1,0 +1,72 @@
+-- Template for headless PoB2 DPS comparisons.
+-- Copy this into src/_scratch_<name>.lua (src/_scratch_* is gitignored, see .git/info/exclude),
+-- fill in the placeholders, run it from src/, then delete it when done.
+--
+-- Run from repo src/ dir:
+--   LUA_PATH="../runtime/lua/?.lua;../runtime/lua/?/init.lua;;" \
+--   LUA_CPATH="../runtime/?.so;;" \
+--   luajit _scratch_<name>.lua
+
+dofile("HeadlessWrapper.lua")
+
+local f = io.open("BUILD_XML_PATH_HERE", "r")
+local xmlText = f:read("*a")
+f:close()
+
+loadBuildFromXML(xmlText, "headless-analysis")
+
+-- Uncomment to dump every socket group and its gems, to find the group index
+-- you want (build.mainSocketGroup from the export is just the *default* main
+-- skill in PoB's UI -- any group can be selected for calc purposes):
+--
+-- for i, grp in ipairs(build.skillsTab.socketGroupList) do
+-- 	local names = {}
+-- 	for _, g in ipairs(grp.gemList or {}) do table.insert(names, g.nameSpec or "?") end
+-- 	print(i, grp.source or "(no source)", table.concat(names, " | "))
+-- end
+
+local GROUP_INDEX = 1 -- <-- set to the socket group you want to evaluate
+
+local function recalc(label)
+	build.mainSocketGroup = GROUP_INDEX
+	build.buildFlag = true
+	build.modFlag = true
+	runCallback("OnFrame")
+	build.calcsTab:BuildOutput()
+	runCallback("OnFrame")
+	local out = build.calcsTab.mainOutput
+	print(string.format(
+		"[%s] TotalDPS=%.2f CombinedDPS=%.2f CritChance=%s AverageDamage=%.2f",
+		label, out.TotalDPS or -1, out.CombinedDPS or -1, tostring(out.CritChance), out.AverageDamage or -1))
+end
+
+recalc("baseline")
+
+-- ---------------------------------------------------------------------------
+-- Gem swap. Find the gem instance to mutate, e.g. by nameSpec:
+--
+-- local grp = build.skillsTab.socketGroupList[GROUP_INDEX]
+-- local target
+-- for _, g in ipairs(grp.gemList) do
+-- 	if g.nameSpec == "OLD GEM NAME" then target = g end
+-- end
+--
+-- IMPORTANT: gemId must be the src/Data/Gems.lua table KEY, which is NOT the
+-- same string as the exported XML's gemId attribute. The XML/gameId form looks
+-- like "Metadata/Items/Gem/SupportGemFoo"; the Gems.lua table key looks like
+-- "Metadata/Items/Gems/SkillGemFoo" (note: "Gems" plural, "SkillGem" prefix
+-- even for supports). Grep Data/Gems.lua for the gem's display name first:
+--   grep -n '"Foo"' src/Data/Gems.lua
+-- and copy the ["Metadata/Items/Gems/..."] key from the surrounding table,
+-- OR copy nameSpec/gemId/skillId verbatim from another gem instance already
+-- in this build that uses the target gem (safest -- no typos possible).
+--
+-- target.nameSpec = "NEW GEM NAME"
+-- target.gemId = "Metadata/Items/Gems/SkillGemNEWGEM"
+-- target.skillId = nil
+-- target.gemData = nil
+-- target.grantedEffect = nil
+-- build.skillsTab:ProcessSocketGroup(grp)
+-- print("resolved:", target.gemData ~= nil, target.nameSpec)  -- gemData must be true, or the swap silently no-ops
+--
+-- recalc("after swap")
