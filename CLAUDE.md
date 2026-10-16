@@ -37,17 +37,17 @@ Running from a repo checkout auto-enables **dev mode** (detected by `manifest.xm
 
 ## macOS native runtime
 
-Official builds are Windows-only; this checkout has a working native arm64 macOS runtime (built 2026-07). Runtime source is `~/Documents/PathOfBuilding-SimpleGraphic`, a clone of `PathOfBuildingCommunity/PathOfBuilding-SimpleGraphic` carrying macOS fixes **not yet upstreamed** (LuaJIT vcpkg-port fixes including a null-safe `getenv` patch, CMake platform-source fixes, missing includes, Win32 `Sleep` removal — see the git diff there). Its launcher `~/Documents/PathOfBuilding-SimpleGraphic/macos-launcher/pob_launch.c` replaces the Windows .exe: it dlopens `libSimpleGraphic.dylib`, calls `RunLuaFileAsWin`, sets `LUA_PATH`/`LUA_CPATH` to exe-relative paths (Unix LuaJIT lacks Windows' `!\lua\?.lua` defaults), and re-execs once with `DYLD_LIBRARY_PATH` set so GLFW's `dlopen("libEGL.dylib")` finds the ANGLE dylibs (`runtime/libEGL.dylib` symlinks to `liblibEGL_angle.dylib`). Staged artifacts in `runtime/` (dylibs, `*.so` modules, `pob-poe2`) are untracked and listed in `.git/info/exclude`.
+Official builds are Windows-only; this checkout has a working native arm64 macOS runtime (built 2026-07). Runtime source is `~/Documents/code/PathOfBuilding-SimpleGraphic`, a clone of `PathOfBuildingCommunity/PathOfBuilding-SimpleGraphic` carrying macOS fixes **not yet upstreamed** (LuaJIT vcpkg-port fixes including a null-safe `getenv` patch, CMake platform-source fixes, missing includes, Win32 `Sleep` removal — see the git diff there). Its launcher `~/Documents/code/PathOfBuilding-SimpleGraphic/macos-launcher/pob_launch.c` replaces the Windows .exe: it dlopens `libSimpleGraphic.dylib`, calls `RunLuaFileAsWin`, sets `LUA_PATH`/`LUA_CPATH` to exe-relative paths (Unix LuaJIT lacks Windows' `!\lua\?.lua` defaults), and re-execs once with `DYLD_LIBRARY_PATH` set so GLFW's `dlopen("libEGL.dylib")` finds the ANGLE dylibs (`runtime/libEGL.dylib` symlinks to `liblibEGL_angle.dylib`). Staged artifacts in `runtime/` (dylibs, `*.so` modules, `pob-poe2`) are untracked and listed in `.git/info/exclude`.
 
 Rebuild after changing SimpleGraphic:
 
 ```sh
-cd ~/Documents/PathOfBuilding-SimpleGraphic
+cd ~/Documents/code/PathOfBuilding-SimpleGraphic
 cmake -B build -S . -G Ninja -DCMAKE_BUILD_TYPE=Release \
   -DVCPKG_TARGET_TRIPLET=arm64-osx-dynamic -DVCPKG_HOST_TRIPLET=arm64-osx-dynamic \
   -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   # host triplet must match target
 cmake --build build
-cp build/libSimpleGraphic.dylib ~/Documents/PathOfBuilding-PoE2/runtime/
+cp build/libSimpleGraphic.dylib ~/Documents/code/PathOfBuilding-PoE2/runtime/
 # native Lua modules go in as .so: liblcurl.dylib → lcurl.so, liblzip.dylib → lzip.so,
 # liblua-utf8.dylib → lua-utf8.so, libsocket.dylib → socket.so
 # (re-run `install_name_tool -add_rpath @loader_path` on replaced files)

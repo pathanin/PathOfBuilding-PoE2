@@ -30,7 +30,7 @@ Confirm both repos against this table each run before acting on it:
 
 | | PoB-PoE2 (this repo) | PathOfBuilding-SimpleGraphic |
 |---|---|---|
-| Path | cwd (`~/Documents/PathOfBuilding-PoE2`) | `~/Documents/PathOfBuilding-SimpleGraphic` — a separate clone, **not** a submodule |
+| Path | cwd (`~/Documents/code/PathOfBuilding-PoE2`) | `~/Documents/code/PathOfBuilding-SimpleGraphic` — a separate clone, **not** a submodule |
 | `origin` (push here) | `pathanin/PathOfBuilding-PoE2` | `pathanin/PathOfBuilding-SimpleGraphic` |
 | `upstream` (fetch only) | `PathOfBuildingCommunity/PathOfBuilding-PoE2` | `PathOfBuildingCommunity/PathOfBuilding-SimpleGraphic` |
 | Sync branch | `dev` | `master` |
