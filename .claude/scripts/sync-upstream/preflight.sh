@@ -62,5 +62,5 @@ repo() {
 	return 0
 }
 
-repo "PoB-PoE2"       "$HOME/Documents/PathOfBuilding-PoE2"        dev    pathanin/PathOfBuilding-PoE2
-repo "SimpleGraphic"  "$HOME/Documents/PathOfBuilding-SimpleGraphic" master pathanin/PathOfBuilding-SimpleGraphic
+repo "PoB-PoE2"       "$HOME/Documents/code/PathOfBuilding-PoE2"        dev    pathanin/PathOfBuilding-PoE2
+repo "SimpleGraphic"  "$HOME/Documents/code/PathOfBuilding-SimpleGraphic" master pathanin/PathOfBuilding-SimpleGraphic
