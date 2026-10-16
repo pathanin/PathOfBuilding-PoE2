@@ -21,6 +21,7 @@ Arguments other than `check`/`dry-run` are context, not instructions to re-plan:
 3. **Never leave a repo half-merged.** Any bail-out path runs `git merge --abort` (or `git reset --hard <pre-merge sha>`), returns to the sync branch, and confirms a clean tree.
 4. **Never overwrite `runtime/` without a backup** taken first (step 10).
 5. **When a choice affects the macOS port, the macOS port wins.** Upstream's Windows-oriented change is never a reason to drop a fork fix.
+6. **No worktree when there is nothing to do.** Never call `EnterWorktree` or `git worktree add` for this procedure. Step 1 is read-only and works on the main clones by absolute path, and step 2 branches inside those clones, so a worktree adds nothing. A run where both repos are up to date (or dry-run) must leave behind no branch, no worktree, no PR. The app creates a session worktree *before* this procedure runs, so that one is outside the procedure's control: start `/sync-upstream` sessions without a worktree, and if one was made anyway, leave it untouched and mention it in the report.
 
 ---
 
@@ -102,7 +103,7 @@ Both repos run **in parallel through step 7**, not one repo fully then the other
    - `>>> UP TO DATE` → that repo has nothing to merge; skip steps 2-9 for it and cover it in the report.
    - An empty P3 intersection does **not** mean safe. P5 is exactly the case that hides from it, so step 5 runs regardless.
    - Any flagged submodule pin → run the reachability check from the Context section.
-   - Dry-run, or both repos up to date → stop here and report.
+   - Dry-run, or both repos up to date → stop here and report. Create nothing (invariant 6).
 
    The script reports facts only; every decision stays yours.
 
