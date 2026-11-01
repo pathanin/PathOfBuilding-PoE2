@@ -7,6 +7,30 @@
 --   LUA_CPATH="../runtime/?.so;;" \
 --   luajit _scratch_<name>.lua
 
+-- Most of PoB's .lua files start with a "#@" line. Older LuaJIT skipped a leading
+-- "#" line in loadfile/dofile; LuaJIT 2.1.1793383622 (Homebrew, 2026-11) no longer
+-- does and fails with "unexpected symbol near '#'". Strip it ourselves so both work.
+local function readStripped(path)
+	local fh, err = io.open(path, "rb")
+	if not fh then return nil, err end
+	local src = fh:read("*a")
+	fh:close()
+	return (src:gsub("^#[^\n]*", ""))
+end
+local _loadfile = loadfile
+loadfile = function(path, ...)
+	if not path then return _loadfile(path, ...) end
+	local src, err = readStripped(path)
+	if not src then return nil, err end
+	return loadstring(src, "@" .. path)
+end
+dofile = function(path) return assert(loadfile(path))() end
+table.insert(package.loaders, 2, function(name)
+	local path = package.searchpath and package.searchpath(name, package.path)
+	if not path then return nil end
+	return assert(loadfile(path))
+end)
+
 dofile("HeadlessWrapper.lua")
 
 local f = io.open("BUILD_XML_PATH_HERE", "r")
