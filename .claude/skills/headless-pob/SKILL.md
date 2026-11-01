@@ -69,6 +69,26 @@ Both env vars **must** end in `;;` — that tells Lua to append the default sear
 path instead of replacing it. Without it, the app's own modules (`Data/*`,
 `Classes/*`, etc.) won't resolve and you'll get cryptic "module not found" errors.
 
+**Gotcha — `unexpected symbol near '#'`.** Most PoB source files start with a
+`#@` line. Newer LuaJIT (seen with Homebrew's 2.1.1793383622, 2026-11) no longer
+skips a leading `#` line in `loadfile`/`dofile`, so loading `HeadlessWrapper.lua`
+— or anything it loads, like `Launch.lua` — fails. The template wraps
+`loadfile`/`dofile`/`require` to strip that line first; keep that block if you
+write a script from scratch. Don't "fix" it by editing the repo's files.
+
+**Gotcha — group indices.** The export's `mainSocketGroup` and the order of
+`<Skill>` elements in the XML don't reliably match `socketGroupList` indices
+(item- and tree-granted groups shift them — an export saying 15 was 18 headless).
+Find groups by their first gem's `nameSpec` instead of hardcoding a number, and
+print the group's gem names before trusting any result.
+
+**Gotcha — stat sets.** Some skills have several stat sets (e.g. Perfect Strike:
+1 = "Normal Strikes", 2 = "Perfect Strike"), and the calc uses index 1 unless the
+gem says otherwise. Results can differ ~5× between them, and some supports only
+apply to one (Window of Opportunity only counts on the Perfect Timing set). Select
+one with `gem.statSetCalcs = { [grantedEffectId] = n }; gem.statSet = { [grantedEffectId] = n }`
+before recalculating, and say which set you reported.
+
 Key API surface (all available once `loadBuildFromXML` has run):
 
 - `build.skillsTab.socketGroupList` — array of skill groups; each has `.gemList`
@@ -79,7 +99,11 @@ Key API surface (all available once `loadBuildFromXML` has run):
   whatever the export had.
 - `build.calcsTab:BuildOutput()` — recomputes; populates `build.calcsTab.mainOutput`
   (`TotalDPS`, `CombinedDPS`, `CritChance`, `AverageDamage`, etc.) and
-  `build.calcsTab.mainEnv`.
+  `build.calcsTab.mainEnv`. For skills flagged
+  `base_skill_show_average_damage_instead_of_dps` (channel/perfect-timing skills
+  like Perfect Strike), `CombinedDPS` is the per-hit average with no DoT added and
+  can be *smaller* than `TotalDPS` — report `TotalDPS`, `IgniteDPS`, `BleedDPS`,
+  etc. separately instead.
 - Always follow a mutation with: `build.buildFlag = true; runCallback("OnFrame");
   build.calcsTab:BuildOutput(); runCallback("OnFrame")`.
 
